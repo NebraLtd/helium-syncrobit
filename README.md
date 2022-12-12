@@ -1,2 +1,2 @@
 # helium-syncrobit
-Balena OpenFleet for Syncrobit Miners
+Balena OpenFleet for Syncrobit CM4 Miners
