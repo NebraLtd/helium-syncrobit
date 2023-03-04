@@ -1,6 +1,8 @@
 name: BalenaCloud App Deploy
 
 on:
+  repository_dispatch:
+    types: [build-open-fleet]
   workflow_dispatch:
 
 jobs:
