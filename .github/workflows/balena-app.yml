@@ -18,10 +18,6 @@ jobs:
           echo "miner=$miner" >> $GITHUB_ENV
       - name: Random sleep (balena API workaround)
         run:  sleep $[ ( $RANDOM % 360 ) + 1 ]s
-      - name: Generate Docker Compose
-        run: |
-          python gen_docker_compose.py raspi -o device-compose-files/docker-compose-raspi.yml
-          cp device-compose-files/docker-compose-raspi.yml docker-compose.yml
       - name: Balena Deploy
         uses: nebraltd/balena-cli-action@v15.0.3
         with:
