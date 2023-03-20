@@ -28,14 +28,18 @@ jobs:
           
           if [ "${{ github.event.client_payload.branch }}" = "production" ]; then
             BRANCH="master"
+            UPSTREAM_BRANCH="production"
           else
             BRANCH="testnet"
+            UPSTREAM_BRANCH="master"
           fi
           
           echo "BRANCH=$BRANCH" >> $GITHUB_ENV
+          echo "UPSTREAM_BRANCH=$UPSTREAM_BRANCH" >> $GITHUB_ENV
           echo "FIRMWARE_SHORT_HASH=$FIRMWARE_SHORT_HASH" >> $GITHUB_ENV
           echo "Firmware Version: $FIRMWARE_SHORT_HASH"
           echo "Branch: $BRANCH"
+          echo "Upstream Branch: $UPSTREAM_BRANCH"
 
       - uses: actions/checkout@v3
         with: 
@@ -44,21 +48,24 @@ jobs:
       - name: Generate Docker Compose
         run: |
           mkdir templates
-          wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/production/settings.ini
-          wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/production/requirements.txt
-          wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/production/gen_docker_compose_by_variant.py
-          wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/production/templates/docker-compose.template -O templates/docker-compose.template
+          wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/"${{ env.UPSTREAM_BRANCH }}"/settings.ini
+          wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/"${{ env.UPSTREAM_BRANCH }}"/requirements.txt
+          wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/"${{ env.UPSTREAM_BRANCH }}"/gen_docker_compose_by_variant.py
+          wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/"${{ env.UPSTREAM_BRANCH }}"/templates/docker-compose.template -O templates/docker-compose.template
           
           pip install -r requirements.txt
           rm -f docker-compose.yml
 
           miner="$(echo ${{ github.event.repository.name }} | cut -d '-' -f2-)"
-          echo "$miner"
+          echo "Repo: $miner"
           if [[ "$miner" =~ "nebra" ]] ; then
             variant="$miner"
           else
             variant="$miner-fl1"
           fi
+          
+          echo "VARIANT=$variant" >> $GITHUB_ENV
+          echo "Variant: $variant"
           
           FIRMWARE_SHORT_HASH=${{ env.FIRMWARE_SHORT_HASH }}
           
@@ -343,5 +350,5 @@ jobs:
         with:
           branch: ${{ env.BRANCH }}
           file-path: docker-compose.yml
-          commit-msg: Update ${{matrix.variant}} variant docker compose output
+          commit-msg: Update ${{ env.VARIANT }} variant docker compose output (${{ env.BRANCH }})
           github-token: ${{ secrets.MR_BUMP }}
