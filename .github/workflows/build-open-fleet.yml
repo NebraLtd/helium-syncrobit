@@ -36,6 +36,7 @@ jobs:
       - name: Generate Docker Compose
         run: |
           mkdir templates
+          wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/production/settings.ini
           wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/production/requirements.txt
           wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/production/gen_docker_compose_by_variant.py
           wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/production/templates/docker-compose.template -O templates/docker-compose.template
