@@ -22,6 +22,39 @@ jobs:
         with: 
           ref: master
 
+      - name: Export short SHA of commit from upstream trigger
+        run: |
+          if [ -z ${github.event.client_payload.firmware+x} ]; then
+            FIRMWARE_SHORT_HASH=$( echo ${GITHUB_SHA:0:7} )
+          else
+            FIRMWARE_SHORT_HASH=${{ github.event.client_payload.firmware }}
+          fi
+          
+          echo "FIRMWARE_SHORT_HASH=$FIRMWARE_SHORT_HASH" >> $GITHUB_ENV
+          echo "Firmware Version: $FIRMWARE_SHORT_HASH"
+          
+      - name: Generate Docker Compose
+        run: |
+          mkdir templates
+          wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/production/requirements.txt
+          wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/production/gen_docker_compose_by_variant.py
+          wget https://raw.githubusercontent.com/NebraLtd/helium-miner-software/production/templates/docker-compose.template -O templates/docker-compose.template
+          
+          pip install -r requirements.txt
+          rm -f docker-compose.yml
+
+          miner="$(echo ${{ github.event.repository.name }} | cut -d '-' -f2-)"
+          echo "$miner"
+          if [[ "$miner" =~ "nebra" ]] ; then
+            variant="${{miner}}"
+          else
+            variant="${{miner}}-fl1"
+          fi
+          
+          FIRMWARE_SHORT_HASH=${{ env.FIRMWARE_SHORT_HASH }}
+          
+          python gen_docker_compose_by_variant.py ${{variant}} -o docker-compose.yml
+          
       - name: Determine if Raspberry Pi 3
         run: |
           repo="${{ github.event.repository.name }}"
@@ -252,7 +285,7 @@ jobs:
           fi
 
           if $VERBOSE ; then
-            echo "Generating checkum"
+            echo "Generating checksum"
           fi
 
           if $NODRYRUN ; then
@@ -286,3 +319,11 @@ jobs:
           tag: ${{ env.LATEST_GA }}-${{ env.IMAGE_NAME }}-OpenFleet
           overwrite: true
           file_glob: true
+
+      - name: Push updated docker compose file
+        uses: test-room-7/action-update-file@v1
+        with:
+          branch: master
+          file-path: docker-compose.yml
+          commit-msg: Update ${{matrix.variant}} variant docker compose output
+          github-token: ${{ secrets.MR_BUMP }}
