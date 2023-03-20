@@ -24,7 +24,7 @@ jobs:
 
       - name: Export short SHA of commit from upstream trigger
         run: |
-          if [ -z ${github.event.client_payload.firmware+x} ]; then
+          if [ -z "${{ github.event.client_payload.firmware }}" ]; then
             FIRMWARE_SHORT_HASH=$( echo ${GITHUB_SHA:0:7} )
           else
             FIRMWARE_SHORT_HASH=${{ github.event.client_payload.firmware }}
@@ -53,7 +53,7 @@ jobs:
           
           FIRMWARE_SHORT_HASH=${{ env.FIRMWARE_SHORT_HASH }}
           
-          python gen_docker_compose_by_variant.py ${{variant}} -o docker-compose.yml
+          python gen_docker_compose_by_variant.py "$variant" -o docker-compose.yml
           
       - name: Determine if Raspberry Pi 3
         run: |
