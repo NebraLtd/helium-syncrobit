@@ -65,7 +65,7 @@ jobs:
           python gen_docker_compose_by_variant.py "$variant" -o docker-compose.yml
           
       - name: Determine if Raspberry Pi 3
-        if: env.BRANCH == "master"
+        if: env.BRANCH == 'master'
         run: |
           repo="${{ github.event.repository.name }}"
 
@@ -95,11 +95,11 @@ jobs:
           echo "ROCKPI=$ROCKPI" >> $GITHUB_ENV
 
       - name: Random sleep (balena API workaround)
-        if: env.BRANCH == "master"
+        if: env.BRANCH == 'master'
         run:  sleep $[ ( $RANDOM % 540 ) + 1 ]s
 
       - name: Install latest balena-cli
-        if: env.BRANCH == "master"
+        if: env.BRANCH == 'master'
         run: |
           sudo apt-get update
           sudo apt-get install -y curl unzip zip
@@ -111,7 +111,7 @@ jobs:
           cd ~
 
       - name: Generate a Balena OS image for the given board, variant, frequency
-        if: env.BRANCH == "master"
+        if: env.BRANCH == 'master'
         run: |
           LATEST_GA=${{ github.event.client_payload.tag }}
           if [ $LATEST_GA != "" ] ; then
@@ -180,7 +180,7 @@ jobs:
           echo "balena_os_version=$balena_os_version" >> $GITHUB_ENV
     
       - name: Balena login
-        if: env.BRANCH == "master"
+        if: env.BRANCH == 'master'
         run: |
           if [ "${{ env.cloud }}" == "nebra-cloud" ]; then
             echo "balenaUrl: cloud.nebra.com" > ~/.balenarc.yml
@@ -198,7 +198,7 @@ jobs:
           fi
 
       - name: Configure Balena OS image for the given board, variant, frequency
-        if: env.BRANCH == "master"
+        if: env.BRANCH == 'master'
         run: |
           # Generate image path for the given board, variant, frequency and user
 
@@ -317,19 +317,19 @@ jobs:
           echo "COMPRESSED_IMAGE_PATH=${COMPRESSED_IMAGE_PATH}" >> $GITHUB_ENV
 
       - name: Set date
-        if: env.BRANCH == "master"
+        if: env.BRANCH == 'master'
         run: |
           echo "timestamp=$(date +'%s')" >> $GITHUB_ENV
           echo "day=$(date +'%F')" >> $GITHUB_ENV
 
       - name: Copy OS image file and checksum to final location
-        if: env.BRANCH == "master"
+        if: env.BRANCH == 'master'
         run: |
           cp "${{ env.COMPRESSED_IMAGE_PATH }}" "${{ env.IMAGE_NAME }}.zip"
           cp "${{ env.COMPRESSED_IMAGE_PATH }}.sha512" "${{ env.IMAGE_NAME }}.zip.sha512"          
 
       - name: Upload image file and checksum to release
-        if: env.BRANCH == "master"
+        if: env.BRANCH == 'master'
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
