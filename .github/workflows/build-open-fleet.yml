@@ -46,9 +46,9 @@ jobs:
           miner="$(echo ${{ github.event.repository.name }} | cut -d '-' -f2-)"
           echo "$miner"
           if [[ "$miner" =~ "nebra" ]] ; then
-            variant="${{miner}}"
+            variant="$miner"
           else
-            variant="${{miner}}-fl1"
+            variant="$miner-fl1"
           fi
           
           FIRMWARE_SHORT_HASH=${{ env.FIRMWARE_SHORT_HASH }}
