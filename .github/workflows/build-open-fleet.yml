@@ -18,10 +18,6 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v3
-        with: 
-          ref: master
-
       - name: Export short SHA of commit from upstream trigger
         run: |
           if [ -z "${{ github.event.client_payload.firmware }}" ]; then
@@ -30,8 +26,20 @@ jobs:
             FIRMWARE_SHORT_HASH=${{ github.event.client_payload.firmware }}
           fi
           
+          if [ "${{ github.event.client_payload.branch }}" = "production" ]; then
+            BRANCH="master"
+          else
+            BRANCH="testnet"
+          fi
+          
+          echo "BRANCH=$BRANCH" >> $GITHUB_ENV
           echo "FIRMWARE_SHORT_HASH=$FIRMWARE_SHORT_HASH" >> $GITHUB_ENV
           echo "Firmware Version: $FIRMWARE_SHORT_HASH"
+          echo "Branch: $BRANCH"
+
+      - uses: actions/checkout@v3
+        with: 
+          ref: ${{ env.BRANCH }}
           
       - name: Generate Docker Compose
         run: |
@@ -57,6 +65,7 @@ jobs:
           python gen_docker_compose_by_variant.py "$variant" -o docker-compose.yml
           
       - name: Determine if Raspberry Pi 3
+        if: ${{ env.BRANCH }} = "master"
         run: |
           repo="${{ github.event.repository.name }}"
 
@@ -86,9 +95,11 @@ jobs:
           echo "ROCKPI=$ROCKPI" >> $GITHUB_ENV
 
       - name: Random sleep (balena API workaround)
+        if: ${{ env.BRANCH }} = "master"
         run:  sleep $[ ( $RANDOM % 540 ) + 1 ]s
 
       - name: Install latest balena-cli
+        if: ${{ env.BRANCH }} = "master"
         run: |
           sudo apt-get update
           sudo apt-get install -y curl unzip zip
@@ -100,6 +111,7 @@ jobs:
           cd ~
 
       - name: Generate a Balena OS image for the given board, variant, frequency
+        if: ${{ env.BRANCH }} = "master"
         run: |
           LATEST_GA=${{ github.event.client_payload.tag }}
           if [ $LATEST_GA != "" ] ; then
@@ -303,16 +315,19 @@ jobs:
           echo "COMPRESSED_IMAGE_PATH=${COMPRESSED_IMAGE_PATH}" >> $GITHUB_ENV
 
       - name: Set date
+        if: ${{ env.BRANCH }} = "master"
         run: |
           echo "timestamp=$(date +'%s')" >> $GITHUB_ENV
           echo "day=$(date +'%F')" >> $GITHUB_ENV
 
       - name: Copy OS image file and checksum to final location
+        if: ${{ env.BRANCH }} = "master"
         run: |
           cp "${{ env.COMPRESSED_IMAGE_PATH }}" "${{ env.IMAGE_NAME }}.zip"
           cp "${{ env.COMPRESSED_IMAGE_PATH }}.sha512" "${{ env.IMAGE_NAME }}.zip.sha512"          
 
       - name: Upload image file and checksum to release
+        if: ${{ env.BRANCH }} = "master"
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -324,7 +339,7 @@ jobs:
       - name: Push updated docker compose file
         uses: test-room-7/action-update-file@v1
         with:
-          branch: master
+          branch: ${{ env.BRANCH }}
           file-path: docker-compose.yml
           commit-msg: Update ${{matrix.variant}} variant docker compose output
           github-token: ${{ secrets.MR_BUMP }}
