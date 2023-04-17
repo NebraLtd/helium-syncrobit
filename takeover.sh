@@ -18,7 +18,7 @@ if [[ ${free_space} -lt ${MIN_FREE_SPACE} ]]; then
 fi
 msg "Free space on data partition: ${free_space} MB"
 
-msg "Preparing takeover dir"
+msg "Preparing takeover dir ${TAKEOVER_DIR}"
 mkdir -p ${TAKEOVER_DIR}
 
 msg "Downloading the firmware image archive from ${FIRMARE_IMAGE_URL}"
