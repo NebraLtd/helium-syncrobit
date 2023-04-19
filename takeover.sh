@@ -7,7 +7,7 @@ function msg() {
 }
 
 TAKEOVER_DIR=/data/nebra-takeover
-TAKEOVER_FILES_ARCHIVE="https://github.com/NebraLtd/helium-syncrobit/archive/refs/heads/takeover-ccrisan.tar.gz"
+TAKEOVER_FILES_ARCHIVE="https://github.com/NebraLtd/helium-syncrobit/archive/refs/heads/takeover.tar.gz"
 FIRMARE_IMAGE_URL="https://api.balena-cloud.com/download?deviceType=raspberrypicm4-ioboard&version=2.112.12&fileType=.gz"
 MIN_FREE_SPACE=$((1024 * 2))  # MB
 
