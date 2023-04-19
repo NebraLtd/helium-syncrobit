@@ -10,6 +10,7 @@ TAKEOVER_DIR=/data/nebra-takeover
 TAKEOVER_FILES_ARCHIVE="https://github.com/NebraLtd/helium-syncrobit/archive/refs/heads/takeover.tar.gz"
 FIRMARE_IMAGE_URL="https://api.balena-cloud.com/download?deviceType=raspberrypicm4-ioboard&version=2.112.12&fileType=.gz"
 MIN_FREE_SPACE=$((1024 * 2))  # MB
+LOOP_DEV=/dev/loop2
 
 free_space=$(df -m /data | tail -n 1 | tr -s ' ' | cut -d ' ' -f 4)
 if [[ ${free_space} -lt ${MIN_FREE_SPACE} ]]; then
@@ -25,7 +26,7 @@ msg "Downloading the firmware image archive from ${FIRMARE_IMAGE_URL}"
 curl -L --fail "${FIRMARE_IMAGE_URL}" -o ${TAKEOVER_DIR}/firmware.img.gz
 
 msg "Extracting the firmware image"
-gunzip ${TAKEOVER_DIR}/firmware.img.gz
+gunzip -f ${TAKEOVER_DIR}/firmware.img.gz
 
 msg "Downloading the takeover files archive from ${TAKEOVER_FILES_ARCHIVE}"
 curl -L --fail "${TAKEOVER_FILES_ARCHIVE}" -o ${TAKEOVER_DIR}/takeover-files.tar.gz
@@ -49,9 +50,11 @@ if grep -qE '^dtparam=ant2' /boot/config.txt; then
 fi
 
 msg "Mounting firmware boot partition"
-losetup -P /dev/loop2 ${TAKEOVER_DIR}/firmware.img || true
+losetup -d ${LOOP_DEV} &>/dev/null || true
+losetup -P ${LOOP_DEV} ${TAKEOVER_DIR}/firmware.img || true
 mkdir -p ${TAKEOVER_DIR}/boot
-mount /dev/loop2p1 ${TAKEOVER_DIR}/boot
+umount ${TAKEOVER_DIR}/boot &>/dev/null || true
+mount ${LOOP_DEV}p1 ${TAKEOVER_DIR}/boot
 
 msg "Injecting config.json"
 cp ${TAKEOVER_DIR}/config.json ${TAKEOVER_DIR}/boot
@@ -68,9 +71,9 @@ if [[ -n "${ssid}" ]] && [[ -n "${psk}" ]]; then
 fi
 
 msg "Unmounting firmware boot partition"
-umount /dev/loop2p1
+umount ${LOOP_DEV}p1
 sync
-losetup -d /dev/loop2
+losetup -d ${LOOP_DEV}
 
 msg "Setting up initramfs boot"
 
