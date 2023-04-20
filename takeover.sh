@@ -12,6 +12,10 @@ FIRMARE_IMAGE_URL="https://api.balena-cloud.com/download?deviceType=raspberrypic
 MIN_FREE_SPACE=$((1024 * 2))  # MB
 LOOP_DEV=/dev/loop2
 
+# Prevent panic reboots during takeover procedure
+panic_inhibit
+
+# Do some cleanups & ensure we've got enough space
 rm -f /data/snapshot.bin
 rm -rf /var/lib/miner/
 
