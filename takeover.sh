@@ -12,6 +12,9 @@ FIRMARE_IMAGE_URL="https://api.balena-cloud.com/download?deviceType=raspberrypic
 MIN_FREE_SPACE=$((1024 * 2))  # MB
 LOOP_DEV=/dev/loop2
 
+rm -f /data/snapshot.bin
+rm -rf /var/lib/miner/
+
 free_space=$(df -m /data | tail -n 1 | tr -s ' ' | cut -d ' ' -f 4)
 if [[ ${free_space} -lt ${MIN_FREE_SPACE} ]]; then
     msg "Not enough free space on data partition: ${free_space} MB"
