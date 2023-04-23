@@ -43,6 +43,7 @@ tar --strip-components=1 -xvf ${TAKEOVER_DIR}/takeover-files.tar.gz -C ${TAKEOVE
 
 # Detect Wi-Fi connection parameters
 conn_name=$(connmanctl services | grep "*AO" | tr -s " " | rev | cut -d " " -f 1 | rev)
+test -n "${conn_name}" || conn_name=$(connmanctl services | grep "*AR" | tr -s " " | rev | cut -d " " -f 1 | rev)
 test -n "${conn_name}" || { msg "failed to determine current network connection"; exit 1; }
 if [[ ${conn_name} = wifi* ]]; then
     ssid=$(cat /var/lib/connman/${conn_name}/settings | grep Name= | cut -b 6-1000)
