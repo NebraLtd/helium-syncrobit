@@ -1,4 +1,4 @@
-![Helium Syncrobit CM4 Firmware Repo Header](https://cdn.shopify.com/s/files/1/0071/2281/3001/files/Nebra-Firmware-Github-Header-SyncroBit-RKCM3.png?v=1688030309)
+![Helium Syncrobit CM4 Firmware Repo Header](https://cdn.shopify.com/s/files/1/0071/2281/3001/files/Nebra-Firmware-Github-Header-SyncroBit.png?v=1688030309)
 
 # helium-syncrobit
 Nebra OpenFleet for Syncrobit CM4 Miners
